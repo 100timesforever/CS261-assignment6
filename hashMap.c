@@ -52,7 +52,7 @@ void _initMap (struct hashMap * ht, int tableSize)
 }
 
 /* allocate memory and initialize a hash map*/
-hashMap *createMap(int tableSize) {
+struct hashMap *createMap(int tableSize) {
 	assert(tableSize > 0);
 	hashMap *ht;
 	ht = malloc(sizeof(hashMap));
@@ -109,23 +109,33 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	/*write this*/
 	//FIXME
 	int i;
+	int hashIndex;
+	struct hashLink *iterator;
 
-	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
-	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
 	//
 	//make a new, empty table, of size newTableSize
-	struct hashLink * temp = malloc(sizeof(struct hashLink)*newTableSize);
+	struct hashMap *new = createMap(newTableSize);
+
 	
 	//for each elememnt in the old table, copy the value
 	//and hash it into the new table
 	for(i = 0; i < ht->size; i++){
-	if	
+		if(ht->table[i] != NULL){
+			iterator = ht->table[i];
+			while(iterator != NULL){
+				insertMap(new, iterator->key, iterator->value);
+			    iterator = iterator->next;
+			}
+		}
+	}	
 
-	//delete the old table		
 	new->tableSize = newTableSize;
 	
+	//delete the old table		
+	deleteMap(ht);
+	//set the pointer for ht to point to the new table
+	ht = temp; 
 }
-
 
 /*
  insert the following values into a hashLink, you must create this hashLink but
@@ -145,6 +155,16 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 {
 	/*write this*/
 	//FIXME
+	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
+	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
+	/*
+				if(HASHING_FUNCTION == 1){
+					hashIndex = stringHash1(ht->table[i]->value) % newTableSize;
+				}
+				else if(HASHING_FUNCTION == 2){
+					hashIndex = stringHash2(ht->table[i]->value) % newTableSize;
+				}
+				*/
 }
 
 /*
