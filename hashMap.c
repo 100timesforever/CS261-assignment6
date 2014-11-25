@@ -67,6 +67,25 @@ hashMap *createMap(int tableSize) {
 void _freeLinks (struct hashLink **table, int tableSize)
 {
 	/*write this*/
+	//FIXME
+	int i;
+	struct hashLink *linkIter;
+	struct hashLink *tmp;
+
+	for(i = 0; i < tableSize; i++){
+		//for each index, grab the link pointed to by the initial bucket
+		linkIter = table[i];
+		
+		//go through each bucket, untill the linked list of collisions is empty,
+		//freeing memory along the way
+		while(linkIter != NULL){
+			tmp = linkIter->next;	//get the next links address
+			free(linkIter->value);	//free the value associated
+			free(linkIter->next);	//free the pointer to the next link
+			free(linkIter);			//free the link itself
+			linkIter = tmp;			//advance to the next link in the chain of collisions
+		}
+	}
 }
 
 /* Deallocate buckets, table, and hashTable structure itself.*/
@@ -76,8 +95,8 @@ void deleteMap(hashMap *ht) {
 	assert(ht!= 0);
 	/* Free all memory used by the buckets */
 	_freeLinks(ht->table, ht->tableSize);
-        /* Free the array of buckets */
-        free(ht->table);
+    /* Free the array of buckets */
+    free(ht->table);
 	/* free the hashMap struct */
 	free(ht);
 }
@@ -88,7 +107,22 @@ Resizes the hash table to be the size newTableSize
 void _setTableSize(struct hashMap * ht, int newTableSize)
 {
 	/*write this*/
+	//FIXME
+	int i;
+	struct hashLink *linkIter;
+
+	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
+	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
+	//
+	//make a new, empty table, of size newTableSize
+	
+	//for each elememnt in the old table, copy the value
+	//and hash it into the new table
+	for(i = 0; i < ht->size; i++){
+
+	//delete the old table		
 }
+
 
 /*
  insert the following values into a hashLink, you must create this hashLink but
@@ -107,6 +141,7 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 {
 	/*write this*/
+	//FIXME
 }
 
 /*
@@ -120,6 +155,12 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 ValueType atMap (struct hashMap * ht, KeyType k)
 {
 	/*write this*/
+	//FIXME
+	
+	//take in the key, and generate the hashed index from it
+	
+
+	//access the map at that index, and return the value
 	return 0;
 }
 
@@ -130,6 +171,11 @@ ValueType atMap (struct hashMap * ht, KeyType k)
 int containsKey (struct hashMap * ht, KeyType k)
 {
 	/*write this*/
+	//FIXME
+	
+	//take in the key, and generate the hashed index from it
+	
+
 	return 0;
 }
 
@@ -142,6 +188,7 @@ int containsKey (struct hashMap * ht, KeyType k)
 void removeKey (struct hashMap * ht, KeyType k)
 {
 	/*write this*/
+	//FIXME
 }
 
 /*
@@ -150,6 +197,7 @@ void removeKey (struct hashMap * ht, KeyType k)
 int size (struct hashMap *ht)
 {
 	/*write this*/
+	//FIXME
 	return 0;
 
 }
@@ -160,6 +208,7 @@ int size (struct hashMap *ht)
 int capacity(struct hashMap *ht)
 {
 	/*write this*/
+	//FIXME
 	return 0;
 }
 
@@ -170,6 +219,7 @@ int capacity(struct hashMap *ht)
 int emptyBuckets(struct hashMap *ht)
 {
 	/*write this*/
+	//FIXME
 	return 0;
 }
 
@@ -183,6 +233,7 @@ int emptyBuckets(struct hashMap *ht)
 float tableLoad(struct hashMap *ht)
 {
 	/*write this*/
+	//FIXME
 	return 0;
 }
 
