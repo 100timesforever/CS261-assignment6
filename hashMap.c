@@ -108,8 +108,6 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 {
 	/*write this*/
 	//FIXME
-	int i;
-	struct hashLink *linkIter;
 
 	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
 	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
@@ -121,6 +119,11 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	for(i = 0; i < ht->size; i++){
 
 	//delete the old table		
+	struct hashMap * new = malloc(sizeof(struct hashMap));
+	new->table = malloc(sizeof(struct hashLink)*newTableSize);
+	new->count = ht->count;
+	new->tableSize = newTableSize;
+	
 }
 
 
