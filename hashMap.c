@@ -108,20 +108,20 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 {
 	/*write this*/
 	//FIXME
+	int i;
 
 	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
 	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
 	//
 	//make a new, empty table, of size newTableSize
+	struct hashLink * temp = malloc(sizeof(struct hashLink)*newTableSize);
 	
 	//for each elememnt in the old table, copy the value
 	//and hash it into the new table
 	for(i = 0; i < ht->size; i++){
+	if	
 
 	//delete the old table		
-	struct hashMap * new = malloc(sizeof(struct hashMap));
-	new->table = malloc(sizeof(struct hashLink)*newTableSize);
-	new->count = ht->count;
 	new->tableSize = newTableSize;
 	
 }
