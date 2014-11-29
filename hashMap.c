@@ -109,7 +109,6 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	/*write this*/
 	//FIXME
 	int i;
-	int hashIndex;
 	struct hashLink *iterator;
 
 	//
@@ -119,7 +118,7 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	
 	//for each elememnt in the old table, copy the value
 	//and hash it into the new table
-	for(i = 0; i < ht->size; i++){
+	for(i = 0; i < ht->count; i++){
 		if(ht->table[i] != NULL){
 			iterator = ht->table[i];
 			while(iterator != NULL){
@@ -134,7 +133,7 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	//delete the old table		
 	deleteMap(ht);
 	//set the pointer for ht to point to the new table
-	ht = temp; 
+	ht = new; 
 }
 
 /*
@@ -155,16 +154,43 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 {
 	/*write this*/
 	//FIXME
+	int hashIndex;
 	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
 	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
-	/*
-				if(HASHING_FUNCTION == 1){
-					hashIndex = stringHash1(ht->table[i]->value) % newTableSize;
-				}
-				else if(HASHING_FUNCTION == 2){
-					hashIndex = stringHash2(ht->table[i]->value) % newTableSize;
-				}
-				*/
+	if(HASHING_FUNCTION == 1){
+		hashIndex = stringHash1(k) % ht->tableSize;
+	}
+	else if(HASHING_FUNCTION == 2){
+		hashIndex = stringHash2(k) % ht->tableSize;
+	}
+	if(ht->table[hashIndex] != NULL) {
+		struct hashLink * itr = ht->table[hashIndex];
+		while(strcmp(itr->key, k) != 0 && itr->next != NULL) {
+			itr = itr->next;
+		}
+		if(itr->next == NULL && strcmp(itr->key, k) != 0) {
+			struct hashLink * new = malloc(sizeof(struct hashLink));
+			new->next = NULL;
+			new->key = k;
+			new->value = v;
+			itr->next = new;
+			ht->count++;
+		}
+		else {
+			itr->value = v;
+		}
+	}
+	else {
+		struct hashLink * new = malloc(sizeof(struct hashLink));
+		new->next = NULL;
+		new->value = v;
+		new->key = k;
+		ht->table[hashIndex] = new;
+		ht->count++;
+	}
+	if(ht->count/ht->tableSize >= LOAD_FACTOR_THRESHOLD) {
+		_setTableSize(ht, ht->tableSize * 2);
+	}
 }
 
 /*
@@ -181,10 +207,25 @@ ValueType atMap (struct hashMap * ht, KeyType k)
 	//FIXME
 	
 	//take in the key, and generate the hashed index from it
+	int hashIndex;
+	if(HASHING_FUNCTION == 1){
+		hashIndex = stringHash1(k) % ht->tableSize;
+	}
+	else if(HASHING_FUNCTION == 2){
+		hashIndex = stringHash2(k) % ht->tableSize;
+	}
 	
 
 	//access the map at that index, and return the value
-	return 0;
+	if(ht->table[hashIndex] != NULL) {
+		struct hashLink * itr = ht->table[hashIndex];
+		while(strcmp(itr->key, k) != 0 && itr->next != NULL) {
+			itr = itr->next;
+		}
+		if(itr->next == NULL && strcmp(itr->key, k) != 0) {return NULL;}
+		return itr->value;
+	}
+	return NULL;
 }
 
 /*
@@ -195,11 +236,17 @@ int containsKey (struct hashMap * ht, KeyType k)
 {
 	/*write this*/
 	//FIXME
-	
+	int hashIndex;
 	//take in the key, and generate the hashed index from it
-	
+	if(HASHING_FUNCTION == 1){
+		hashIndex = stringHash1(k) % ht->tableSize;
+	}
+	else if(HASHING_FUNCTION == 2){
+		hashIndex = stringHash2(k) % ht->tableSize;
+	}
+	if(ht->table[hashIndex] == NULL) { return 0;}
+	return 1;
 
-	return 0;
 }
 
 /*
@@ -212,6 +259,46 @@ void removeKey (struct hashMap * ht, KeyType k)
 {
 	/*write this*/
 	//FIXME
+	//[ , , , , , , , * , * , * ]
+	//                |
+	//                L
+	//                |
+	//                L
+	//                |
+	//                N
+	
+	int hashIndex;
+	struct hashLink *itr;
+	//take in the key, and generate the hashed index from it
+	if(HASHING_FUNCTION == 1){
+		hashIndex = stringHash1(k) % ht->tableSize;
+	}
+	else if(HASHING_FUNCTION == 2){
+		hashIndex = stringHash2(k) % ht->tableSize;
+	}
+	if(ht->table[hashIndex] != NULL) {
+		itr = ht->table[hashIndex];
+		//seperate case for if first value is a match
+		if(strcmp(itr->key, k) == 0){
+			struct hashLink * del = itr;
+			ht->table[hashIndex] = del->next;
+			free(del);
+			ht->count--;
+			return;
+		}
+		//average case where first value is not a match
+		//allows for keeping track of parent
+		while(strcmp(itr->next->key, k) != 0 && itr->next != NULL){
+			itr = itr->next;
+		}
+		if(itr->next == NULL) { return;}
+		else{
+			struct hashLink * del = itr->next;
+			itr->next = del->next;
+			free(del);
+			ht->count--;
+		}
+	}
 }
 
 /*
@@ -221,7 +308,7 @@ int size (struct hashMap *ht)
 {
 	/*write this*/
 	//FIXME
-	return 0;
+	return(ht->count);
 
 }
 
@@ -232,7 +319,7 @@ int capacity(struct hashMap *ht)
 {
 	/*write this*/
 	//FIXME
-	return 0;
+	return(ht->tableSize);
 }
 
 /*
@@ -243,7 +330,13 @@ int emptyBuckets(struct hashMap *ht)
 {
 	/*write this*/
 	//FIXME
-	return 0;
+	int empty = 0;
+	int i;
+	for(i=0; i<ht->tableSize; i++) {
+		if(ht->table[i] == NULL)
+			empty++;
+	}
+	return empty;
 }
 
 /*
@@ -257,7 +350,7 @@ float tableLoad(struct hashMap *ht)
 {
 	/*write this*/
 	//FIXME
-	return 0;
+	return((float)ht->count/ht->tableSize);
 }
 
 /* print the hashMap */
