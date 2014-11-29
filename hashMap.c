@@ -155,8 +155,6 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 	/*write this*/
 	//FIXME
 	int hashIndex;
-	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
-	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
 	if(HASHING_FUNCTION == 1){
 		hashIndex = stringHash1(k) % ht->tableSize;
 	}

@@ -77,6 +77,7 @@ int main (int argc, const char * argv[]) {
 		#ifdef DEBUG
 		printf("==> Word: %s\n", word);
 		#endif
+		
 		if (word != NULL){
 			if(containsKey(hashTable, word) == 0) {
 				#ifdef DEBUG
@@ -92,8 +93,8 @@ int main (int argc, const char * argv[]) {
 				#ifdef DEBUG
 				printf("Adding to an old key\n");
 				#endif
-				//find the value at that key
-				value = (int*)atMap(hashTable, word);
+				//find the value at that key (int*)
+				value = atMap(hashTable, word);
 				//increase the value by one
 #ifdef DEBUG
 				printf("addr of value: %p \n", value);
@@ -106,6 +107,7 @@ int main (int argc, const char * argv[]) {
 		printf("==> check to see if inputted correctly\n");
 		printf("==> key: %s | val: %d\n", word, atMap(hashTable, word) );
 #endif
+	
 
 	}while(word != NULL); 
 
