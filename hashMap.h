@@ -4,6 +4,8 @@
 # define KeyType char *
 # define ValueType void*
 
+# define DEBUG
+
 typedef void (*keyPrinter)(KeyType key);
 typedef void (*valPrinter)(ValueType val);
 

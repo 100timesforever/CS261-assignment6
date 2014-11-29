@@ -214,6 +214,9 @@ ValueType atMap (struct hashMap * ht, KeyType k)
 	else if(HASHING_FUNCTION == 2){
 		hashIndex = stringHash2(k) % ht->tableSize;
 	}
+#ifdef DEBUG
+	printf("==> Hash index for key '%s': %d\n", k, hashIndex);
+#endif 
 	
 
 	//access the map at that index, and return the value
