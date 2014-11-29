@@ -37,6 +37,13 @@ int main (int argc, const char * argv[]) {
 	int tableSize = 10;
 	clock_t timer;
 	FILE *fileptr;
+
+	char *word;
+	int peek;
+	int *value;
+
+	int i = 0;
+
     /*
      this part is using command line arguments, you can use them if you wish
      but it is not required. DO NOT remove this code though, we will use it for
@@ -51,12 +58,60 @@ int main (int argc, const char * argv[]) {
         filename = "input1.txt"; /*specify your input text file here*/
 
     printf("opening file: %s\n", filename);
+	
+	fileptr = fopen(filename, "r");
 
 	timer = clock();
 
 	hashTable = createMap(tableSize);
 
     /*... concordance code goes here ...*/
+	do{
+		//for debugging
+		#ifdef DEBUG
+		i++;
+		printf("==> i: %d\n", i);
+		#endif
+
+		word = getWord(fileptr);
+		#ifdef DEBUG
+		printf("==> Word: %s\n", word);
+		#endif
+		if (word != NULL){
+			if(containsKey(hashTable, word) == 0) {
+				#ifdef DEBUG
+				printf("Adding a new Key\n");
+				#endif
+				//insert a new link using the fancy int pointer stuff on the assignment website
+				value = malloc(sizeof(int));
+
+				*value = 1;
+				insertMap(hashTable, word, value);
+			}
+			else{
+				#ifdef DEBUG
+				printf("Adding to an old key\n");
+				#endif
+				//find the value at that key
+				value = (int*)atMap(hashTable, word);
+				//increase the value by one
+#ifdef DEBUG
+				printf("addr of value: %p \n", value);
+#endif
+
+				//*value++;
+			}
+		}
+#ifdef DEBUG
+		printf("==> check to see if inputted correctly\n");
+		printf("==> key: %s | val: %d\n", word, atMap(hashTable, word) );
+#endif
+
+	}while(word != NULL); 
+
+	//close the file at the end
+	fclose(fileptr);	
+		
 
 	/*... concordance code ends here ...*/
 
