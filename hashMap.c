@@ -111,6 +111,9 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	int i;
 	struct hashLink *iterator;
 
+#ifdef DEBUG
+	printf("\n!!!RESIZING!!!\n\n");
+#endif
 	//
 	//make a new, empty table, of size newTableSize
 	struct hashMap *new = createMap(newTableSize);
@@ -131,7 +134,9 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	new->tableSize = newTableSize;
 	
 	//delete the old table		
-	deleteMap(ht);
+	//deleteMap(ht);
+	_freeLinks(ht->table, ht->tableSize);
+	free(ht->table);
 	//set the pointer for ht to point to the new table
 	ht = new; 
 }
@@ -155,14 +160,17 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 	/*write this*/
 	//FIXME
 	int hashIndex;
-	//MAKE SURE TO HAVE THE ABILITY TO EASILY SWITCH 
-	//BETWEEN HASHING FUNCTIONS. SEE HIS .h FILE FOR MORE INFO
+	//Monitor the load factor here
+
+	//get the index, based on the different hash functions.
 	if(HASHING_FUNCTION == 1){
 		hashIndex = stringHash1(k) % ht->tableSize;
 	}
 	else if(HASHING_FUNCTION == 2){
 		hashIndex = stringHash2(k) % ht->tableSize;
 	}
+
+	//starting off with the case were the bucket is not yet empty
 	if(ht->table[hashIndex] != NULL) {
 		struct hashLink * itr = ht->table[hashIndex];
 		while(strcmp(itr->key, k) != 0 && itr->next != NULL) {
@@ -172,7 +180,7 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 			struct hashLink * new = malloc(sizeof(struct hashLink));
 			new->next = NULL;
 			new->key = k;
-			new->value = v;
+			new->value = (int *)v;
 			itr->next = new;
 			ht->count++;
 		}
@@ -180,15 +188,26 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 			itr->value = v;
 		}
 	}
+	//The else handles the case where the bucket is empty
 	else {
 		struct hashLink * new = malloc(sizeof(struct hashLink));
 		new->next = NULL;
-		new->value = v;
+		new->value = (int *)v;
 		new->key = k;
+#ifdef DEBUG
+		printf("___INSIDE insertMap___\n");
+		printf("V, which was passed in: %d\n", v);
+		printf("V deref: %d\n", *(int *)v);
+		printf("deref new->value: %d\n", *(int *)new->value);
+		printf("new->key: %s\n", new->key);
+#endif
 		ht->table[hashIndex] = new;
 		ht->count++;
 	}
-	if(ht->count/ht->tableSize >= LOAD_FACTOR_THRESHOLD) {
+#ifdef DEBUG
+	printf("LOAD FACTOR: %f\n", tableLoad(ht) );
+#endif
+	if(tableLoad(ht) >= LOAD_FACTOR_THRESHOLD) {
 		_setTableSize(ht, ht->tableSize * 2);
 	}
 }
@@ -222,12 +241,32 @@ ValueType atMap (struct hashMap * ht, KeyType k)
 	//access the map at that index, and return the value
 	if(ht->table[hashIndex] != NULL) {
 		struct hashLink * itr = ht->table[hashIndex];
-		while(strcmp(itr->key, k) != 0 && itr->next != NULL) {
-			itr = itr->next;
+		while(1) {
+			//if we hit the end of the bucket list
+			if (itr->next == NULL) {
+				break;
+			}
+			// if we find a match for that key, return the value
+			else if (strcmp(itr->key, k) == 0 ){
+				return itr->value;
+			}
+			//else, keep iterating
+			else{
+				itr = itr->next;
+			}
 		}
-		if(itr->next == NULL && strcmp(itr->key, k) != 0) {return NULL;}
+//		if(itr->next == NULL && strcmp(itr->key, k) != 0) {
+#ifdef DEBUG
+//			printf("At map returns NULL case 2\n");
+#endif
+//			return NULL;
+//		}
+
 		return itr->value;
 	}
+#ifdef DEBUG
+	printf("At map returns NULL case 1\n");
+#endif
 	return NULL;
 }
 
@@ -240,6 +279,7 @@ int containsKey (struct hashMap * ht, KeyType k)
 	/*write this*/
 	//FIXME
 	int hashIndex;
+	struct hashLink * itr;
 	//take in the key, and generate the hashed index from it
 	if(HASHING_FUNCTION == 1){
 		hashIndex = stringHash1(k) % ht->tableSize;
@@ -248,8 +288,21 @@ int containsKey (struct hashMap * ht, KeyType k)
 		hashIndex = stringHash2(k) % ht->tableSize;
 	}
 	if(ht->table[hashIndex] == NULL) { return 0;}
-	return 1;
-
+	else{
+		itr = ht->table[hashIndex];
+		while(itr != NULL) {
+#ifdef DEBUG
+			printf("CONTAINS KEY\n");
+			printf("itr: %p\n", itr);
+			printf("itr->key: %s\n", itr->key);
+#endif
+			if (strcmp(itr->key, k) == 0 ) {
+				return 1;
+			}
+			itr = itr->next;
+		}
+	return 0;
+	}
 }
 
 /*
@@ -279,6 +332,7 @@ void removeKey (struct hashMap * ht, KeyType k)
 	else if(HASHING_FUNCTION == 2){
 		hashIndex = stringHash2(k) % ht->tableSize;
 	}
+
 	if(ht->table[hashIndex] != NULL) {
 		itr = ht->table[hashIndex];
 		//seperate case for if first value is a match
@@ -291,8 +345,18 @@ void removeKey (struct hashMap * ht, KeyType k)
 		}
 		//average case where first value is not a match
 		//allows for keeping track of parent
-		while(strcmp(itr->next->key, k) != 0 && itr->next != NULL){
-			itr = itr->next;
+		while(1){
+			//we create seperate checks, not simultaneous checks in the while loop
+			//because if the first one is true, then the second one will segfault
+			if (itr->next == NULL){
+				break;
+			}
+			else if (strcmp(itr->next->key, k) == 0) {
+				break;
+			}
+			else{
+				itr = itr->next;
+			}
 		}
 		if(itr->next == NULL) { return;}
 		else{

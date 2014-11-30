@@ -41,6 +41,7 @@ int main (int argc, const char * argv[]) {
 	char *word;
 	int peek;
 	int *value;
+	int test;
 
 	int i = 0;
 
@@ -70,6 +71,7 @@ int main (int argc, const char * argv[]) {
 		//for debugging
 		#ifdef DEBUG
 		i++;
+		printf("====================\n");
 		printf("==> i: %d\n", i);
 		#endif
 
@@ -78,7 +80,8 @@ int main (int argc, const char * argv[]) {
 		printf("==> Word: %s\n", word);
 		#endif
 		if (word != NULL){
-			if(containsKey(hashTable, word) == 0) {
+			test = containsKey(hashTable, word);
+			if(test == 0) {
 				#ifdef DEBUG
 				printf("Adding a new Key\n");
 				#endif
@@ -86,6 +89,9 @@ int main (int argc, const char * argv[]) {
 				value = malloc(sizeof(int));
 
 				*value = 1;
+#ifdef DEBUG
+				printf ("Value: %d || ADDR of val: %p\n", *value, value);
+#endif
 				insertMap(hashTable, word, value);
 			}
 			else{
@@ -93,19 +99,20 @@ int main (int argc, const char * argv[]) {
 				printf("Adding to an old key\n");
 				#endif
 				//find the value at that key
-				value = (int*)atMap(hashTable, word);
+				value = atMap(hashTable, word);
 				//increase the value by one
 #ifdef DEBUG
-				printf("addr of value: %p \n", value);
+				printf("val of value: %d\n", *(int *)value);
 #endif
 
-				//*value++;
+				*(int *)value = *(int *)value + 1;
 			}
-		}
+		
 #ifdef DEBUG
 		printf("==> check to see if inputted correctly\n");
-		printf("==> key: %s | val: %d\n", word, atMap(hashTable, word) );
+		printf("==> key: %s | val: %d\n", word, (int *) atMap(hashTable, word) );
 #endif
+		}
 
 	}while(word != NULL); 
 
