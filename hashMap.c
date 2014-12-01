@@ -80,8 +80,6 @@ void _freeLinks (struct hashLink **table, int tableSize)
 		//freeing memory along the way
 		while(linkIter != NULL){
 			tmp = linkIter->next;	//get the next links address
-			free(linkIter->value);	//free the value associated
-			free(linkIter->next);	//free the pointer to the next link
 			free(linkIter);			//free the link itself
 			linkIter = tmp;			//advance to the next link in the chain of collisions
 		}
@@ -121,7 +119,7 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 	
 	//for each elememnt in the old table, copy the value
 	//and hash it into the new table
-	for(i = 0; i < ht->count; i++){
+	for(i = 0; i < ht->tableSize; i++){
 		if(ht->table[i] != NULL){
 			iterator = ht->table[i];
 			while(iterator != NULL){
@@ -131,14 +129,17 @@ void _setTableSize(struct hashMap * ht, int newTableSize)
 		}
 	}	
 
-	new->tableSize = newTableSize;
 	
 	//delete the old table		
 	//deleteMap(ht);
 	_freeLinks(ht->table, ht->tableSize);
 	free(ht->table);
 	//set the pointer for ht to point to the new table
-	ht = new; 
+	ht->tableSize = newTableSize;
+	ht->table = new->table; 
+#ifdef DEBUG
+	printf("\n!!!END RESIZING!!!\n\n");
+#endif
 }
 
 /*
@@ -208,7 +209,7 @@ void insertMap (struct hashMap * ht, KeyType k, ValueType v)
 	printf("LOAD FACTOR: %f\n", tableLoad(ht) );
 #endif
 	if(tableLoad(ht) >= LOAD_FACTOR_THRESHOLD) {
-		_setTableSize(ht, ht->tableSize * 2);
+		_setTableSize(ht, (ht->tableSize)*2);
 	}
 }
 

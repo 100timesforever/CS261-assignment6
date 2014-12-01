@@ -4,7 +4,7 @@
 # define KeyType char *
 # define ValueType void*
 
-# define DEBUG
+//# define DEBUG
 
 typedef void (*keyPrinter)(KeyType key);
 typedef void (*valPrinter)(ValueType val);
@@ -16,7 +16,7 @@ typedef void (*valPrinter)(ValueType val);
  hashing functions that your code uses. you are not required to use this value
  though.
  */
-# define HASHING_FUNCTION 2
+# define HASHING_FUNCTION 1
 
 /* load factor threshold for resizing the hash table */
 # define LOAD_FACTOR_THRESHOLD 0.75
